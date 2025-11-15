@@ -11,3 +11,104 @@ gbackup() {
   git branch "backup/${branch}-${timestamp}"
   echo "✔ Backup criado: backup/${branch}-${timestamp}"
 }
+
+gsquash() {
+  local branch base commit_count msg
+  
+  # Verificar estado limpo
+  if ! git diff-index --quiet HEAD --; then
+    echo "❌ Há mudanças não commitadas. Commit ou stash antes."
+    return 1
+  fi
+  
+  branch=$(git branch --show-current)
+  
+  # 🔒 Segurança: branches protegidas
+  case "$branch" in
+    main|master|develop|development|dev|stage|staging|release* )
+      echo "❌ Squash bloqueado na branch protegida: $branch"
+      return 1
+      ;;
+  esac
+  
+  # 🎯 APENAS upstream - sem heurística
+  base="$(git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null)"
+  
+  if [ -z "$base" ]; then
+    echo "❌ Branch sem upstream configurado."
+    echo ""
+    echo "Configure o upstream primeiro:"
+    echo "  git branch --set-upstream-to=origin/main"
+    echo "  ou"
+    echo "  git push -u origin $branch"
+    return 1
+  fi
+  
+  # Contar commits a serem squashados
+  commit_count=$(git rev-list --count "$base..HEAD")
+  
+  if [ "$commit_count" -eq 0 ]; then
+    echo "⚠️  Nenhum commit novo em relação a $base"
+    return 0
+  fi
+  
+  if [ "$commit_count" -eq 1 ]; then
+    echo "ℹ️  Apenas 1 commit. Nada para squashar."
+    return 0
+  fi
+  
+  echo "✔️  Base (upstream): $base"
+  echo "📦 $commit_count commits serão consolidados em 1"
+  echo ""
+  
+  # Mostrar preview dos commits
+  echo "Commits que serão squashados:"
+  git log --oneline "$base..HEAD"
+  echo ""
+  
+  # Confirmar operação
+  read -p "🤔 Continuar? [y/N] " -n 1 -r
+  echo
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "❌ Operação cancelada"
+    return 1
+  fi
+  
+  # 🛟 Criar backup
+  echo "💾 Criando backup..."
+  gbackup || return 1
+  
+  # 🔥 Fazer o squash
+  echo "🔄 Fazendo squash..."
+  git fetch origin
+  
+  # Capturar mensagens dos commits para referência
+  msg=$(git log --format='- %s' "$base..HEAD")
+  
+  git reset --soft "$base"
+  
+  # Commit com editor para ajustar mensagem
+  git commit -e -m "squash: consolidados $commit_count commits
+
+    Commits originais:
+    $msg
+    " || return 1
+  
+  echo ""
+  echo "✅ Squash local concluído!"
+  echo ""
+  
+  # Perguntar sobre push
+  read -p "🚀 Fazer push --force-with-lease agora? [y/N] " -n 1 -r
+  echo
+  
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    git push --force-with-lease origin "$branch" || return 1
+    echo "🎉 Squash e push concluídos com sucesso!"
+  else
+    echo "💡 Para fazer push depois: git push --force-with-lease origin $branch"
+  fi
+  
+  echo ""
+  echo "📊 Resumo: $commit_count commits → 1 commit"
+}
