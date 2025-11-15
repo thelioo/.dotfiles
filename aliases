@@ -1,0 +1,13 @@
+alias gs="git status"
+
+gbackup() {
+  local branch
+  local timestamp
+  branch=$(git rev-parse --abbrev-ref HEAD)
+  timestamp=$(date +%Y%m%d%H%M%S)
+  
+  git fetch origin
+  git checkout "$branch"
+  git branch "backup/${branch}-${timestamp}"
+  echo "✔ Backup criado: backup/${branch}-${timestamp}"
+}
