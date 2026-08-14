@@ -1,0 +1,53 @@
+{
+  // AI
+  "chat.disableAIFeatures": true,
+
+  // Visual geral
+  "workbench.colorTheme": "Dark Modern",
+  "window.commandCenter": false,
+
+  // Activity bar / sidebar
+  "workbench.activityBar.location": "top",
+
+  // Editor
+  "editor.minimap.enabled": false,
+  "editor.stickyScroll.enabled": false,
+  "editor.codeLens": false,
+  "editor.folding": false,
+  "editor.glyphMargin": false,
+
+  // Breadcrumbs
+  "breadcrumbs.enabled": false,
+
+  // Guias visuais
+  "editor.guides.indentation": false,
+  "editor.guides.bracketPairs": false,
+  "editor.renderWhitespace": "selection",
+
+  // Scrollbar mais discreta
+  "editor.scrollbar.vertical": "hidden",
+  "editor.scrollbar.horizontal": "hidden",
+  "editor.overviewRulerBorder": false,
+
+  // Editor mais confortável
+  "editor.fontSize": 14,
+  "editor.lineHeight": 22,
+  "editor.fontLigatures": true,
+  "editor.smoothScrolling": true,
+  "editor.cursorSmoothCaretAnimation": "on",
+  "editor.cursorBlinking": "solid",
+
+  // Arquivos
+  "workbench.editor.showIcons": false,
+  "workbench.editor.tabSizing": "shrink",
+
+  // Startup
+  "workbench.startupEditor": "none",
+
+  // Menos popups
+  "editor.lightbulb.enabled": "off",
+  "editor.hover.delay": 800,
+  "files.autoSave": "afterDelay",
+  "chat.agent.enabled": false,
+  "claudeCode.useTerminal": true
+}
